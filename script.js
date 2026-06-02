@@ -1,27 +1,16 @@
-// التهيئة وجلب البيانات من LocalStorage أو إنشاء مصفوفة فارغة
 let subscribers = JSON.parse(localStorage.getItem('debt_app_data')) || [];
 let currentClientId = null;
 
-// دالة لتنسيق الأرقام (العملة العراقية)
-const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US').format(amount) + ' د.ع';
-};
-
-// دالة للحصول على تاريخ اليوم بشكل منسق
+const formatCurrency = (amount) => new Intl.NumberFormat('en-US').format(amount) + ' د.ع';
 const getTodayDate = () => {
     const today = new Date();
     return `${today.getFullYear()}/${today.getMonth() + 1}/${today.getDate()}`;
 };
 
-// حفظ البيانات في LocalStorage
-const saveData = () => {
-    localStorage.setItem('debt_app_data', JSON.stringify(subscribers));
-};
+const saveData = () => localStorage.setItem('debt_app_data', JSON.stringify(subscribers));
 
-// إدارة النوافذ المنبثقة
 const openModal = (modalId) => {
     document.getElementById(modalId).classList.add('active');
-    // تعيين التاريخ تلقائياً عند فتح النافذة
     if (modalId === 'add-sub-modal') document.getElementById('sub-date').value = getTodayDate();
     if (modalId === 'add-debt-modal') document.getElementById('debt-date').value = getTodayDate();
     if (modalId === 'repay-modal') document.getElementById('repay-date').value = getTodayDate();
@@ -29,21 +18,16 @@ const openModal = (modalId) => {
 
 const closeModal = (modalId) => {
     document.getElementById(modalId).classList.remove('active');
-    // تفريغ الحقول
     const inputs = document.querySelectorAll(`#${modalId} input:not([readonly])`);
     inputs.forEach(input => input.value = '');
 };
 
-// التنقل بين الصفحات
 const goHome = () => {
     document.getElementById('details-page').classList.remove('active');
     document.getElementById('home-page').classList.add('active');
     currentClientId = null;
-    
-    // تصفير حقل البحث عند العودة للرئيسية
     const searchInput = document.getElementById('search-input');
     if(searchInput) searchInput.value = '';
-    
     renderSubscribers();
 };
 
@@ -54,15 +38,10 @@ const openClientDetails = (id) => {
     renderClientDetails();
 };
 
-// عرض قائمة المشتركين (مع دعم البحث الفلترة)
 const renderSubscribers = (searchTerm = '') => {
     const list = document.getElementById('subscribers-list');
     list.innerHTML = '';
-    
-    // فلترة المشتركين بناءً على النص المدخل (سواء من أول حرف أو أي جزء من الاسم)
-    const filteredSubscribers = subscribers.filter(sub => 
-        sub.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredSubscribers = subscribers.filter(sub => sub.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
     if(filteredSubscribers.length === 0) {
         list.innerHTML = '<p style="text-align:center; opacity:0.6;">لا يوجد مشتركون بهذا الاسم.</p>';
@@ -86,13 +65,8 @@ const renderSubscribers = (searchTerm = '') => {
     });
 };
 
-// دالة البحث (تستدعى تلقائياً عند الكتابة في حقل البحث)
-const filterSubscribers = () => {
-    const query = document.getElementById('search-input').value;
-    renderSubscribers(query);
-};
+const filterSubscribers = () => renderSubscribers(document.getElementById('search-input').value);
 
-// عرض تفاصيل العميل المحدد (الديون والمعاملات)
 const renderClientDetails = () => {
     const client = subscribers.find(s => s.id === currentClientId);
     if (!client) return;
@@ -102,8 +76,6 @@ const renderClientDetails = () => {
 
     const transList = document.getElementById('transactions-list');
     transList.innerHTML = '';
-
-    // عرض المعاملات من الأحدث للأقدم
     const reversedTransactions = [...client.transactions].reverse();
     
     reversedTransactions.forEach(trans => {
@@ -124,96 +96,95 @@ const renderClientDetails = () => {
     });
 };
 
-// وظيفة: إضافة مشترك جديد
 const saveSubscriber = () => {
     const name = document.getElementById('sub-name').value.trim();
     const phone = document.getElementById('sub-phone').value.trim();
     const date = document.getElementById('sub-date').value;
 
-    if (!name || !phone) {
-        alert('الرجاء إدخال الاسم والرقم');
-        return;
-    }
+    if (!name || !phone) return alert('الرجاء إدخال الاسم والرقم');
 
-    const newSub = {
-        id: Date.now(),
-        name,
-        phone,
-        date,
-        totalDebt: 0,
-        transactions: []
-    };
-
-    subscribers.push(newSub);
+    subscribers.push({ id: Date.now(), name, phone, date, totalDebt: 0, transactions: [] });
     saveData();
     closeModal('add-sub-modal');
-    
-    // إعادة تعيين حقل البحث وعرض القائمة كاملة
     document.getElementById('search-input').value = '';
     renderSubscribers();
 };
 
-// وظيفة: إضافة دين على العميل الحالي
 const saveDebt = () => {
     const product = document.getElementById('debt-product').value.trim();
     const amount = parseFloat(document.getElementById('debt-amount').value);
     const date = document.getElementById('debt-date').value;
 
-    if (!product || isNaN(amount) || amount <= 0) {
-        alert('الرجاء إدخال تفاصيل صحيحة');
-        return;
-    }
+    if (!product || isNaN(amount) || amount <= 0) return alert('الرجاء إدخال تفاصيل صحيحة');
 
     const client = subscribers.find(s => s.id === currentClientId);
     client.totalDebt += amount;
-    
-    client.transactions.push({
-        id: Date.now(),
-        type: 'debt',
-        title: product,
-        amount: amount,
-        date: date
-    });
+    client.transactions.push({ id: Date.now(), type: 'debt', title: product, amount, date });
 
     saveData();
     closeModal('add-debt-modal');
     renderClientDetails();
 };
 
-// وظيفة: تسديد دفعة من ديون العميل
 const saveRepayment = () => {
     const amount = parseFloat(document.getElementById('repay-amount').value);
     const date = document.getElementById('repay-date').value;
     const notes = document.getElementById('repay-notes').value.trim();
 
-    if (isNaN(amount) || amount <= 0) {
-        alert('الرجاء إدخال مبلغ صحيح');
-        return;
-    }
+    if (isNaN(amount) || amount <= 0) return alert('الرجاء إدخال مبلغ صحيح');
 
     const client = subscribers.find(s => s.id === currentClientId);
-    
     if(amount > client.totalDebt && client.totalDebt > 0) {
        if(!confirm('المبلغ المسدد أكبر من الدين المتبقي! هل تريد المتابعة؟')) return;
     }
 
     client.totalDebt -= amount;
-    
-    client.transactions.push({
-        id: Date.now(),
-        type: 'repay',
-        title: 'تسديد دفعة',
-        amount: amount,
-        date: date,
-        notes: notes
-    });
+    client.transactions.push({ id: Date.now(), type: 'repay', title: 'تسديد دفعة', amount, date, notes });
 
     saveData();
     closeModal('repay-modal');
     renderClientDetails();
 };
 
-// التشغيل الأولي عند فتح الصفحة
-window.onload = () => {
-    renderSubscribers();
-};
+// ==========================================
+// 🚀 PWA & Service Worker Logic
+// ==========================================
+
+// تسجيل الـ Service Worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker تم التسجيل بنجاح', reg.scope))
+            .catch(err => console.error('فشل تسجيل الـ Service Worker', err));
+    });
+}
+
+// التحكم بنافذة التثبيت
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    // منع ظهور شريط التثبيت الافتراضي الصغير
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    // إظهار نافذة (Modal) التثبيت المخصصة التي صممناها بعد ثانية من فتح التطبيق
+    setTimeout(() => {
+        openModal('install-modal');
+    }, 1000);
+});
+
+// وظيفة زر "تثبيت الآن" داخل الـ Modal
+document.getElementById('install-btn').addEventListener('click', async () => {
+    if (deferredPrompt) {
+        // إظهار شاشة التثبيت الرسمية للنظام
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`اختيار المستخدم للتثبيت: ${outcome}`);
+        // تفريغ المتغير
+        deferredPrompt = null;
+        // إغلاق نافذتنا المخصصة
+        closeModal('install-modal');
+    }
+});
+
+// التشغيل الأولي
+window.onload = () => renderSubscribers();
