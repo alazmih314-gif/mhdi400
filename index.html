@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تطبيق إدارة الديون</title>
+    <link rel="manifest" href="./manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -17,8 +18,7 @@
             </div>
             <button class="btn-primary" onclick="openModal('add-sub-modal')">+ إضافة مشترك</button>
         </div>
-        <div class="content" id="subscribers-list">
-            </div>
+        <div class="content" id="subscribers-list"></div>
     </div>
 
     <div id="details-page" class="page">
@@ -35,8 +35,7 @@
         </div>
         <div class="content">
             <h3 class="section-title">سجل المعاملات</h3>
-            <div id="transactions-list">
-                </div>
+            <div id="transactions-list"></div>
         </div>
     </div>
 
@@ -82,6 +81,18 @@
             <div class="modal-actions">
                 <button class="btn-success" onclick="saveRepayment()">حفظ التسديد</button>
                 <button class="btn-secondary" onclick="closeModal('repay-modal')">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="install-modal" class="modal">
+        <div class="modal-content glass-effect" style="text-align: center;">
+            <img src="./icon-192x192.png" alt="أيقونة التطبيق" style="width: 80px; height: 80px; border-radius: 20px; margin-bottom: 15px;">
+            <h3>تثبيت التطبيق</h3>
+            <p style="margin-bottom: 15px; opacity: 0.8;">قم بتثبيت التطبيق للعمل بدون إنترنت وبشكل أسرع.</p>
+            <div class="modal-actions">
+                <button class="btn-primary" id="install-btn">تثبيت الآن</button>
+                <button class="btn-secondary" onclick="closeModal('install-modal')">ليس الآن</button>
             </div>
         </div>
     </div>
