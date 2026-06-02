@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق إدارة الديون</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="home-page" class="page active">
+        <div class="header glass-effect">
+            <h2>قائمة العملاء</h2>
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="بحث عن اسم المشترك..." oninput="filterSubscribers()">
+            </div>
+            <button class="btn-primary" onclick="openModal('add-sub-modal')">+ إضافة مشترك</button>
+        </div>
+        <div class="content" id="subscribers-list">
+            </div>
+    </div>
+
+    <div id="details-page" class="page">
+        <div class="header glass-effect">
+            <h2 id="client-name-title">اسم العميل</h2>
+            <div class="debt-card glass-effect">
+                <p>الديون الباقية</p>
+                <h3 id="total-debt">0 د.ع</h3>
+            </div>
+            <div class="action-buttons">
+                <button class="btn-danger" onclick="openModal('add-debt-modal')">إضافة دين</button>
+                <button class="btn-success" onclick="openModal('repay-modal')">تسديد دفعة</button>
+            </div>
+        </div>
+        <div class="content">
+            <h3 class="section-title">سجل المعاملات</h3>
+            <div id="transactions-list">
+                </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav glass-effect">
+        <button class="nav-item active" onclick="goHome()">
+            <span>🏠</span>
+            <span>الرئيسية</span>
+        </button>
+    </nav>
+
+    <div id="add-sub-modal" class="modal">
+        <div class="modal-content glass-effect">
+            <h3>إضافة مشترك جديد</h3>
+            <input type="text" id="sub-name" placeholder="اسم الزبون" required>
+            <input type="tel" id="sub-phone" placeholder="رقم الزبون" required>
+            <input type="text" id="sub-date" readonly>
+            <div class="modal-actions">
+                <button class="btn-primary" onclick="saveSubscriber()">حفظ</button>
+                <button class="btn-secondary" onclick="closeModal('add-sub-modal')">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="add-debt-modal" class="modal">
+        <div class="modal-content glass-effect">
+            <h3>إضافة دين جديد</h3>
+            <input type="text" id="debt-product" placeholder="اسم المنتج" required>
+            <input type="number" id="debt-amount" placeholder="المبلغ (د.ع)" required>
+            <input type="text" id="debt-date" readonly>
+            <div class="modal-actions">
+                <button class="btn-danger" onclick="saveDebt()">حفظ الدين</button>
+                <button class="btn-secondary" onclick="closeModal('add-debt-modal')">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="repay-modal" class="modal">
+        <div class="modal-content glass-effect">
+            <h3>تسديد مبلغ</h3>
+            <input type="number" id="repay-amount" placeholder="المبلغ المسدد (د.ع)" required>
+            <input type="text" id="repay-date" readonly>
+            <input type="text" id="repay-notes" placeholder="ملاحظات (اختياري)">
+            <div class="modal-actions">
+                <button class="btn-success" onclick="saveRepayment()">حفظ التسديد</button>
+                <button class="btn-secondary" onclick="closeModal('repay-modal')">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
